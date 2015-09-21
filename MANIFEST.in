@@ -1,0 +1,3 @@
+recursive-include bouser/web/static *
+recursive-include bouser/web/templates/*
+graft twisted
