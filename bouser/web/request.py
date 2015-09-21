@@ -10,7 +10,6 @@ from twisted.python import reflect, log
 from twisted.python.compat import intToBytes
 from twisted.web import resource, html, http, error, microdom
 from twisted.web.server import Request, NOT_DONE_YET, supportedMethods
-from bouser._compat import deferred_tasklet
 from bouser.web.cors import OptionsFinish
 
 from .interfaces import IBouserSite, IWebSession, ITemplatedRequest
@@ -34,7 +33,6 @@ def error_page(request, resrc, value, tb=None):
 class BouserRequest(Request):
     currentAppPath = '/'
 
-    @deferred_tasklet
     def render_template(self, name, **kwargs):
         if not IBouserSite.providedBy(self.site):
             raise RuntimeError('Site does not provide templating capabilities')
