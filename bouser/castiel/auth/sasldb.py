@@ -9,6 +9,7 @@ from zope.interface import implementer
 from bouser.helpers.plugin_helpers import BouserPlugin
 from bouser.castiel.exceptions import EInvalidCredentials
 from bouser.castiel.interfaces import IAuthenticator, IAuthObject
+from bouser.utils import safe_bytes
 
 __author__ = 'viruzzz-kun'
 __created__ = '13.09.2015'
@@ -40,17 +41,13 @@ class SasldbAuthenticator(BouserPlugin):
 
     def __init__(self, filename, realm):
         self.filename = filename
-        self.realm = realm
+        self.realm = safe_bytes(realm)
 
     def get_user(self, login, password):
-        if isinstance(password, unicode):
-            pwd = password.encode('utf-8', errors='ignore')
-        elif isinstance(password, str):
-            pwd = password
-        else:
-            return defer.fail(failure.Failure(TypeError('password should be either unicode ot str')))
+        pwd = safe_bytes(password)
+        login = safe_bytes(login)
         db = bsddb.hashopen(self.filename, 'r')
-        key = '%s\x00%s\x00userPassword' % (login, self.realm)
+        key = b'%s\x00%s\x00userPassword' % (login, self.realm)
         try:
             if db[key] != pwd:
                 raise KeyError

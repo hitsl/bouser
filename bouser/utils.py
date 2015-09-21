@@ -3,6 +3,7 @@ import datetime
 import json
 import functools
 from Queue import Queue
+import six
 from twisted.application.service import Service
 
 from twisted.internet import defer
@@ -191,3 +192,11 @@ class ThreadWrapper(Service):
         def wrapper(*args, **kwargs):
             return self.call(func, *args, **kwargs)
         return wrapper
+
+
+def safe_bytes(value):
+    if isinstance(value, six.text_type):
+        return value.encode('utf-8', errors='ignore')
+    elif isinstance(value, six.binary_type):
+        return value
+    return str(value)
