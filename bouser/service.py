@@ -77,5 +77,4 @@ class Application(MultiService):
 
     def restartService(self):
         log.msg('...Reloading service...', system="Bouser")
-        self.stopService()
-        self.startService()
+        self.stopService().addCallback(lambda x: self.startService())
