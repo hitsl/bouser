@@ -39,6 +39,13 @@ def pretty_print(d, indent=0):
     return result.getvalue()
 
 
+def eat(func):
+    def wrapper(d):
+        func()
+        return d
+    return wrapper
+
+
 class Application(MultiService):
     def __init__(self, options):
         MultiService.__init__(self)
@@ -78,4 +85,6 @@ class Application(MultiService):
 
     def restartService(self):
         log.msg('...Reloading service...', system="Bouser")
-        self.stopService().addCallback(lambda _: Dependency.destroy_all()).addCallback(lambda x: self.startService())
+        return self.stopService() \
+            .addCallback(eat(Dependency.destroy_all)) \
+            .addCallback(eat(self.startService))
