@@ -4,7 +4,7 @@ import cStringIO
 
 import blinker
 from twisted.python import log, filepath
-from twisted.internet import inotify
+from twisted.internet import inotify, reactor
 from twisted.application.service import MultiService
 
 from bouser.helpers.config_helpers import make_config
@@ -47,8 +47,10 @@ class Application(MultiService):
         self.fail = False
 
         notifier = inotify.INotify()
-        notifier.startReading()
-        notifier.watch(
+        reactor.callLater(0, notifier.startReading)
+        reactor.callLater(
+            0,
+            notifier.watch,
             filepath.FilePath(self.options['config']),
             callbacks=[self.restartService()]
         )
