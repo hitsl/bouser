@@ -3,7 +3,8 @@
 import cStringIO
 
 import blinker
-from twisted.python import log
+from twisted.python import log, filepath
+from twisted.internet import inotify
 from twisted.application.service import MultiService
 
 from bouser.helpers.config_helpers import make_config
@@ -42,15 +43,20 @@ class Application(MultiService):
         MultiService.__init__(self)
         self.options = options
         self.config = {}
-        self.common_config = {}
         self.modules = []
         self.fail = False
+
+        notifier = inotify.INotify()
+        notifier.startReading()
+        notifier.watch(
+            filepath.FilePath(self.options['config']),
+            callbacks=[self.restartService()]
+        )
 
     def reload_config(self):
         config = self.config = make_config(self.options['config'])
         log.msg(pretty_print(config))
         self.modules = []
-        self.common_config = config.get('common')
         for name, cfg in config.get('module', {}).iteritems():
             log.msg(name, system='Loading')
             self.modules.append(make_plugin(name, cfg))
@@ -64,3 +70,8 @@ class Application(MultiService):
             raise RuntimeError('Not all dependencies satisfied')
         else:
             MultiService.startService(self)
+
+    def restartService(self):
+        log.msg('...Reloading service...', system="Bouser")
+        self.stopService()
+        self.startService()
