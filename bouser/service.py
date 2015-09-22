@@ -50,7 +50,7 @@ class Application(MultiService):
         notifier.startReading()
         notifier.watch(
             filepath.FilePath(self.options['config']),
-            callbacks=[self.restartService]
+            callbacks=[self._inotify_reload]
         )
 
     def reload_config(self):
@@ -70,6 +70,10 @@ class Application(MultiService):
             raise RuntimeError('Not all dependencies satisfied')
         else:
             MultiService.startService(self)
+
+    def _inotify_reload(self, _, filepath, mask):
+        log.msg('%s occured on %s' % (', '.join(inotify.humanReadableMask(mask)), filepath))
+        self.restartService()
 
     def restartService(self):
         log.msg('...Reloading service...', system="Bouser")
