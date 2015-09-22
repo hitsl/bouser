@@ -169,7 +169,8 @@ class CastielService(Service, RequestAuthMixin, BouserPlugin):
         Service.startService(self)
 
     def stopService(self):
-        self.expired_cleaner.stop()
+        if self.expired_cleaner and self.expired_cleaner.running:
+            self.expired_cleaner.stop()
         with open('tokens.msgpack', 'wb') as f:
             f.write(msgpack_helpers.dump(self.tokens))
         Service.stopService(self)

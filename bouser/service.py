@@ -3,6 +3,7 @@
 import cStringIO
 
 import blinker
+from bouser.helpers.plugin_helpers import Dependency
 from twisted.python import log, filepath
 from twisted.internet import inotify, reactor
 from twisted.application.service import MultiService
@@ -77,4 +78,4 @@ class Application(MultiService):
 
     def restartService(self):
         log.msg('...Reloading service...', system="Bouser")
-        self.stopService().addCallback(lambda x: self.startService())
+        self.stopService().addCallback(lambda _: Dependency.destroy_all()).addCallback(lambda x: self.startService())

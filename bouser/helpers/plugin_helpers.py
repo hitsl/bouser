@@ -83,3 +83,7 @@ class Dependency(object):
             func._connect_to_signals = []
         func._connect_to_signals.append(self.signal_name + ':boot')
         return func
+
+    @classmethod
+    def destroy_all(cls):
+        cls.__instances = {}
