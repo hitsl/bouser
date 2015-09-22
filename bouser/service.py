@@ -47,12 +47,10 @@ class Application(MultiService):
         self.fail = False
 
         notifier = inotify.INotify()
-        reactor.callLater(0, notifier.startReading)
-        reactor.callLater(
-            0,
-            notifier.watch,
+        notifier.startReading()
+        notifier.watch(
             filepath.FilePath(self.options['config']),
-            callbacks=[self.restartService()]
+            callbacks=[self.restartService]
         )
 
     def reload_config(self):
